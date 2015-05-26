@@ -1,0 +1,25 @@
+{
+  "strict" : true,
+  "curly" : true,
+  "eqeqeq" : true,
+  "forin" : true,
+  "freeze" : true,
+  "immed" : true,
+  "indent" : 4,
+  "latedef" : true,
+  "newcap": true,
+  "noarg" : true,
+  "noempty" : true,
+  "quotmark" : "single",
+  "undef" : true,
+  "unused" :true,
+  "trailing" : true,
+  "maxparams" : 4,
+  "maxlen" : 100,
+  "globals" : { 
+    "module" : true,
+    "window" : true,
+    "document" : true,
+    "console" : true
+  }
+}

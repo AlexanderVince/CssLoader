@@ -1,0 +1,17 @@
+{
+  "name": "cssloader",
+  "version": "0.0.1",
+  "authors": [
+    "Alexander Vince <https://github.com/AlexanderVince>"
+  ],
+  "license": "BSD 3-Clause <http://opensource.org/licenses/BSD-3-Clause>",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components"
+  ],
+  "dependencies": {
+    "matchMedia": "https://github.com/paulirish/matchMedia.js.git#~0.2.0"
+  }
+}

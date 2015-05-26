@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>QUnit Tests</title>
+  <link rel="stylesheet" href="//code.jquery.com/qunit/qunit-1.18.0.css">
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+  <script src="//code.jquery.com/qunit/qunit-1.18.0.js"></script>
+  <script src="../bower_components/matchMedia/matchMedia.js"></script>
+  <script src="../src/cssloader.js"></script>
+  <script>
+  	CssLoader.require([
+  		{
+  			media : '(min-width: 0px)',
+  			href : 'resources/core.css'
+  		},
+  		{
+  			media : '(min-width: 0px) and (max-width: 499px)',
+  			href : 'resources/medium.css'
+  		},
+  		{
+  			media : '(min-width: 500px) and (max-width: 999px)',
+  			href : 'resources/large.css'
+  		},
+  		{
+  			media : '(min-width: 1000px)',
+  			href : 'resources/wide.css'
+  		}
+  	]);
+  </script>
+</body>
+</html>
