@@ -2,7 +2,6 @@
  * cssloader.js
  * 
  * @author Alexander Vince <https://github.com/AlexanderVince>
- * @date  Tuesday 26th May 2015
  * @copyright 2015 Alexander Vince
  * @license BSD 3-Clause <http://opensource.org/licenses/BSD-3-Clause>
  *
