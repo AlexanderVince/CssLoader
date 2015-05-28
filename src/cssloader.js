@@ -41,6 +41,12 @@ window.CssLoader = (function(window, document, undefined) {
 		__initialised : false,
 
 		/**
+		 * [__hashChange description]
+		 * @type {Boolean}
+		 */
+		__hashChange : false,
+
+		/**
 		 * require - Initialise CssLoader with the given queries
 		 * 
 		 * @param  {Array} An array of media objects
@@ -49,44 +55,67 @@ window.CssLoader = (function(window, document, undefined) {
 		 * CssLoader.require([
 		 * 	{
 		 * 		media : '(min-width: 0px)',
-		 * 		href : 'resources/core.css'
+		 * 		href : 'resources/core.css',
+		 * 		url : ''
 		 * 	},
 		 * 	{
 		 * 		media : '(min-width: 0px) and (max-width: 499px)',
-		 * 		href : 'resources/medium.css'
+		 * 		href : 'resources/medium.css',
+		 * 		url : ''
 		 * 	},
 		 * 	{
 		 * 		media : '(min-width: 500px) and (max-width: 999px)',
-		 * 		href : 'resources/large.css'
+		 * 		href : 'resources/product-detail-page-large.css',
+		 * 		url : '/productdetailpage'
 		 * 	},
 		 * 	{
 		 * 		media : '(min-width: 1000px)',
-		 * 		href : 'resources/wide.css'
+		 * 		href : 'resources/product-detail-page-wide.css',
+		 * 		url : '/productdetailpage'
 		 * 	}
-		 * ]);
+		 * ], { hashchange : false });
 		 * 
 		 */
-		require : function(queries) {
+		require : function(queries, config) {
 
 			if (this.__initialised) {
 				return false;
 			}
 
 			this.__initialised = true;
+			this.__hashChange = (config.hashChange ? true : false);
+			this.__curUrl = this.__getPathName();
 			this.__head = document.getElementsByTagName('head')[0];
 			this.__len = this.__head.getElementsByTagName('link').length;
+			this.__resizeEvtSet = false;
 			this.__queries = queries;
 
-			if (window.matchMedia) {
-				this.__addListener();
-				this.__matchMedia();
-				return this;
-			}
+			// if (window.matchMedia) {
+			// 	this.__addListeners();
+			// 	// this.__matchMedia();
+			// 	return this;
+			// }
 
-			this.__matchMedia(true);
+			this.__addListeners();
+			this.__match(false, this.__curUrl);
 			return this;
 		}
 
+	};
+
+	/**
+	 * 
+	 * [__getPathName description]
+	 * 
+	 * @return {[type]} [description]
+	 * 
+	 */
+	CssLoader.__getPathName = function() {
+
+		if (!this.__hashChange) {
+			return window.location.pathname;
+		}
+		return window.location.hash;
 	};
 
 	/**
@@ -95,15 +124,31 @@ window.CssLoader = (function(window, document, undefined) {
 	 * change occurs.
 	 * 
 	 */
-	CssLoader.__addListener = function() {
+	CssLoader.__addListeners = function() {
+
+		var that = this;
 
 		if (window.addEventListener) {
-			
-			var that = this;
 			window.addEventListener('resize', function() {
-				that.__matchMedia();
+				that.__match(false, that.__curUrl);
 			}, false);
 		}
+
+		/**
+		 * Should be replaced with more modern way 
+		 * history and hash support
+		 */
+		(function hasUrlChanged() {
+
+			window.setTimeout(function() {		
+				var url = that.__getPathName();
+				if (url !== that.__curUrl) {
+					that.__curUrl = url;
+					that.__match(false, url);
+				}
+				hasUrlChanged();
+			}, 500);
+		})();
 
 	};
 
@@ -116,7 +161,7 @@ window.CssLoader = (function(window, document, undefined) {
 	 * @param {Boolean} Load all stylesheets
 	 * 
 	 */
-	CssLoader.__matchMedia = function(loadall) {
+	CssLoader.__match = function(loadall, url) {
 
 		var queries = [].concat(this.__queries);
 
@@ -124,9 +169,7 @@ window.CssLoader = (function(window, document, undefined) {
 			
 			var q = queries[_i],
 				mq = window.matchMedia(q.media);
-			
-			if (loadall || !q.rendered && mq.matches) {
-
+			if (loadall || !q.rendered && mq.matches && url === q.url) {
 				this.__writeTag(q);
 				queries[_i].rendered = true;
 			}
