@@ -41,7 +41,13 @@ window.CssLoader = (function(window, document, undefined) {
 		__initialised : false,
 
 		/**
-		 * require - Initialise CssLoader with the given queries
+		 * [__hashChange description]
+		 * @type {Boolean}
+		 */
+		__hashChange : false,
+
+		/**
+		 * require - Initialise CssLoader with the given params
 		 * 
 		 * @param  {Array} An array of media objects
 		 * @return {Object} CssLoader Object
@@ -49,74 +55,108 @@ window.CssLoader = (function(window, document, undefined) {
 		 * CssLoader.require([
 		 * 	{
 		 * 		media : '(min-width: 0px)',
-		 * 		href : 'resources/core.css'
+		 * 		href : 'resources/core.css',
+		 * 		url : ''
 		 * 	},
 		 * 	{
 		 * 		media : '(min-width: 0px) and (max-width: 499px)',
-		 * 		href : 'resources/medium.css'
+		 * 		href : 'resources/medium.css',
+		 * 		url : ''
 		 * 	},
 		 * 	{
 		 * 		media : '(min-width: 500px) and (max-width: 999px)',
-		 * 		href : 'resources/large.css'
+		 * 		href : 'resources/product-detail-page-large.css',
+		 * 		url : '/productdetailpage'
 		 * 	},
 		 * 	{
 		 * 		media : '(min-width: 1000px)',
-		 * 		href : 'resources/wide.css'
+		 * 		href : 'resources/product-detail-page-wide.css',
+		 * 		url : '/productdetailpage'
 		 * 	}
-		 * ]);
+		 * ], { hashChange : false });
 		 * 
 		 */
-		require : function(queries) {
+		require : function(queries, config) {
 
 			if (this.__initialised) {
 				return false;
 			}
 
 			this.__initialised = true;
+			this.__hashChange = (config.hashChange ? true : false);
+			this.__curUrl = this.__getPathName();
 			this.__head = document.getElementsByTagName('head')[0];
 			this.__len = this.__head.getElementsByTagName('link').length;
 			this.__queries = queries;
 
 			if (window.matchMedia) {
-				this.__addListener();
-				this.__matchMedia();
+				this.__addListeners();
+				this.__match(false, this.__curUrl);
 				return this;
 			}
 
-			this.__matchMedia(true);
+			this.__match(true);
 			return this;
 		}
 
 	};
 
 	/**
-	 * __addListeners - Binds event listener to watch for 
-	 * window resize and calls __matchMedia when a 
-	 * change occurs.
+	 * 
+	 * __getPathName - Returns current url pathname
+	 * 
+	 * @return {String} Pathname
 	 * 
 	 */
-	CssLoader.__addListener = function() {
+	CssLoader.__getPathName = function() {
 
-		if (window.addEventListener) {
-			
-			var that = this;
-			window.addEventListener('resize', function() {
-				that.__matchMedia();
-			}, false);
+		if (!this.__hashChange) {
+			return window.location.pathname;
 		}
-
+		var pathname = window.location.hash.replace(/#/g, '');
+		return pathname;
 	};
 
 	/**
-	 * __matchMedia - Checks if the given media queries 
-	 * match the window state and calls __writeTag when
-	 * true. If all boolean is true all stylesheets
+	 * __addListeners - Binds event listener to watch for 
+	 * window resize and sets a timer recursivly to 
+	 * check for url change, calls __match when a 
+	 * change occurs.
+	 * 
+	 */
+	CssLoader.__addListeners = function() {
+
+		var that = this;
+
+		if (window.addEventListener) {
+			window.addEventListener('resize', function() {
+				that.__match(false, that.__curUrl);
+			}, false);
+		}
+
+		(function hasStateChanged() {
+
+			window.setTimeout(function() {		
+				var url = that.__getPathName();
+				if (url !== that.__curUrl) {
+					that.__curUrl = url;
+					that.__match(false, url);
+				}
+				hasStateChanged();
+			}, 500);
+		})();
+	};
+
+	/**
+	 * __match - Checks if the given media queries 
+	 * and or page state match and calls __writeTag
+	 * when true. If loadall boolean is true all stylesheets
 	 * will be loaded.
 	 *
 	 * @param {Boolean} Load all stylesheets
 	 * 
 	 */
-	CssLoader.__matchMedia = function(loadall) {
+	CssLoader.__match = function(loadall, url) {
 
 		var queries = [].concat(this.__queries);
 
@@ -124,9 +164,7 @@ window.CssLoader = (function(window, document, undefined) {
 			
 			var q = queries[_i],
 				mq = window.matchMedia(q.media);
-			
-			if (loadall || !q.rendered && mq.matches) {
-
+			if (loadall || !q.rendered && mq.matches && url === q.url) {
 				this.__writeTag(q);
 				queries[_i].rendered = true;
 			}
@@ -153,23 +191,20 @@ window.CssLoader = (function(window, document, undefined) {
 			links = head.getElementsByTagName('link'),
 			link = this.__createTag(attributes),
 			sort = [],
-			queryIndex,
-			headIndex;
+			index;
 			
 		for (var _i=0,_len=queries.length; _i<_len; _i++) {
 
 			var q = queries[_i];
 			if (q.href === attributes.href) {
 				sort.push(q);
-				queryIndex = sort.length - 1;
+				index = links[this.__len + (sort.length - 1)];
 			} else if (q.rendered) {
 				sort.push(q);
 			}
 		}
 
-		headIndex = links[this.__len + queryIndex];
-
-		if (!headIndex) {
+		if (!index) {
 			head.appendChild(link);
 		} else {
 			head.insertBefore(link, headIndex);

@@ -14,22 +14,30 @@
   <script>
   	CssLoader.require([
   		{
+  			id : 'file1',
   			media : '(min-width: 0px)',
-  			href : 'resources/core.css'
+  			href : 'resources/core.css',
+  			url  : '/test/'
   		},
   		{
+  			id : 'file2',
   			media : '(min-width: 0px) and (max-width: 499px)',
-  			href : 'resources/medium.css'
+  			href : 'resources/medium.css',
+  			url : '/test/'
   		},
   		{
+  			id : 'file3',
   			media : '(min-width: 500px) and (max-width: 999px)',
-  			href : 'resources/large.css'
+  			href : 'resources/product-detail-page-large.css',
+  			url : '/productdetailpage'
   		},
   		{
+  			id : 'file4',
   			media : '(min-width: 1000px)',
-  			href : 'resources/wide.css'
+  			href : 'resources/product-detail-page-wide.css',
+  			url : '/productdetailpage'
   		}
-  	]);
+  	], { hashChange : false });
   </script>
 </body>
 </html>

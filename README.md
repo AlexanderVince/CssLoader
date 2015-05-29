@@ -1,10 +1,10 @@
 # CssLoader
-### A media query driven async CSS loader
+### A media query & url driven async CSS loader
 ***
 
 *** Warning: This repo should be considered as currently in development. ***
 
-Designed for low bandwidth/signal situations CssLoader looks to improve the performance of responsive websites by only loading stylesheets when the browser/device meets any of the given media query criteria.
+Designed for low bandwidth/signal situations CssLoader looks to improve the performance of responsive websites by only loading stylesheets when the browser/device meets any of the given url or media query criteria.
 
 #### Browser Support
 
@@ -20,22 +20,30 @@ All stylesheets will be added to the DOM in the order of the array passed to the
 ````
 CssLoader.require([
   		{
+  			id : 'file1',
   			media : '(min-width: 0px)',
-  			href : 'resources/core.css'
+  			href : 'resources/core.css',
+  			url  : '/test/'
   		},
   		{
+  			id : 'file2',
   			media : '(min-width: 0px) and (max-width: 499px)',
-  			href : 'resources/medium.css'
+  			href : 'resources/medium.css',
+  			url : '/test/'
   		},
   		{
+  			id : 'file3',
   			media : '(min-width: 500px) and (max-width: 999px)',
-  			href : 'resources/large.css'
+  			href : 'resources/product-detail-page-large.css',
+  			url : '/productdetailpage'
   		},
   		{
+  			id : 'file4',
   			media : '(min-width: 1000px)',
-  			href : 'resources/wide.css'
+  			href : 'resources/product-detail-page-wide.css',
+  			url : '/productdetailpage'
   		}
-]);
+], { hashChange : false });
 ````
 
 #### License
