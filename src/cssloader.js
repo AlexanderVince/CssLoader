@@ -207,7 +207,7 @@ window.CssLoader = (function(window, document, undefined) {
 		if (!index) {
 			head.appendChild(link);
 		} else {
-			head.insertBefore(link, headIndex);
+			head.insertBefore(link, index);
 		}
 
 	};
