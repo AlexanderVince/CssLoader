@@ -47,7 +47,7 @@ window.CssLoader = (function(window, document, undefined) {
 		__hashChange : false,
 
 		/**
-		 * require - Initialise CssLoader with the given queries
+		 * require - Initialise CssLoader with the given params
 		 * 
 		 * @param  {Array} An array of media objects
 		 * @return {Object} CssLoader Object
@@ -73,7 +73,7 @@ window.CssLoader = (function(window, document, undefined) {
 		 * 		href : 'resources/product-detail-page-wide.css',
 		 * 		url : '/productdetailpage'
 		 * 	}
-		 * ], { hashchange : false });
+		 * ], { hashChange : false });
 		 * 
 		 */
 		require : function(queries, config) {
@@ -87,17 +87,15 @@ window.CssLoader = (function(window, document, undefined) {
 			this.__curUrl = this.__getPathName();
 			this.__head = document.getElementsByTagName('head')[0];
 			this.__len = this.__head.getElementsByTagName('link').length;
-			this.__resizeEvtSet = false;
 			this.__queries = queries;
 
-			// if (window.matchMedia) {
-			// 	this.__addListeners();
-			// 	// this.__matchMedia();
-			// 	return this;
-			// }
+			if (window.matchMedia) {
+				this.__addListeners();
+				this.__match(false, this.__curUrl);
+				return this;
+			}
 
-			this.__addListeners();
-			this.__match(false, this.__curUrl);
+			this.__match(true);
 			return this;
 		}
 
@@ -105,9 +103,9 @@ window.CssLoader = (function(window, document, undefined) {
 
 	/**
 	 * 
-	 * [__getPathName description]
+	 * __getPathName - Returns current url pathname
 	 * 
-	 * @return {[type]} [description]
+	 * @return {String} Pathname
 	 * 
 	 */
 	CssLoader.__getPathName = function() {
@@ -115,12 +113,14 @@ window.CssLoader = (function(window, document, undefined) {
 		if (!this.__hashChange) {
 			return window.location.pathname;
 		}
-		return window.location.hash;
+		var pathname = window.location.hash.replace(/#/g, '');
+		return pathname;
 	};
 
 	/**
 	 * __addListeners - Binds event listener to watch for 
-	 * window resize and calls __matchMedia when a 
+	 * window resize and sets a timer recursivly to 
+	 * check for url change, calls __match when a 
 	 * change occurs.
 	 * 
 	 */
@@ -134,11 +134,7 @@ window.CssLoader = (function(window, document, undefined) {
 			}, false);
 		}
 
-		/**
-		 * Should be replaced with more modern way 
-		 * history and hash support
-		 */
-		(function hasUrlChanged() {
+		(function hasStateChanged() {
 
 			window.setTimeout(function() {		
 				var url = that.__getPathName();
@@ -146,16 +142,15 @@ window.CssLoader = (function(window, document, undefined) {
 					that.__curUrl = url;
 					that.__match(false, url);
 				}
-				hasUrlChanged();
+				hasStateChanged();
 			}, 500);
 		})();
-
 	};
 
 	/**
-	 * __matchMedia - Checks if the given media queries 
-	 * match the window state and calls __writeTag when
-	 * true. If all boolean is true all stylesheets
+	 * __match - Checks if the given media queries 
+	 * and or page state match and calls __writeTag
+	 * when true. If loadall boolean is true all stylesheets
 	 * will be loaded.
 	 *
 	 * @param {Boolean} Load all stylesheets
@@ -196,23 +191,20 @@ window.CssLoader = (function(window, document, undefined) {
 			links = head.getElementsByTagName('link'),
 			link = this.__createTag(attributes),
 			sort = [],
-			queryIndex,
-			headIndex;
+			index;
 			
 		for (var _i=0,_len=queries.length; _i<_len; _i++) {
 
 			var q = queries[_i];
 			if (q.href === attributes.href) {
 				sort.push(q);
-				queryIndex = sort.length - 1;
+				index = links[this.__len + (sort.length - 1)];
 			} else if (q.rendered) {
 				sort.push(q);
 			}
 		}
 
-		headIndex = links[this.__len + queryIndex];
-
-		if (!headIndex) {
+		if (!index) {
 			head.appendChild(link);
 		} else {
 			head.insertBefore(link, headIndex);
