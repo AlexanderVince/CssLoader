@@ -84,18 +84,18 @@ window.CssLoader = (function(window, document, undefined) {
 
 			this.__initialised = true;
 			this.__hashChange = (config.hashChange ? true : false);
-			this.__curUrl = this.__getPathName();
+			this.__curUrl = this.getPathName();
 			this.__head = document.getElementsByTagName('head')[0];
 			this.__len = this.__head.getElementsByTagName('link').length;
 			this.__queries = queries;
 
 			if (window.matchMedia) {
-				this.__addListeners();
-				this.__match(false, this.__curUrl);
+				this.addListeners();
+				this.matchStyles(false, this.__curUrl);
 				return this;
 			}
 
-			this.__match(true);
+			this.matchStyles(true);
 			return this;
 		}
 
@@ -103,12 +103,12 @@ window.CssLoader = (function(window, document, undefined) {
 
 	/**
 	 * 
-	 * __getPathName - Returns current url pathname
+	 *.getPathName - Returns current url pathname
 	 * 
 	 * @return {String} Pathname
 	 * 
 	 */
-	CssLoader.__getPathName = function() {
+	CssLoader.getPathName = function() {
 
 		if (!this.__hashChange) {
 			return window.location.pathname;
@@ -118,45 +118,51 @@ window.CssLoader = (function(window, document, undefined) {
 	};
 
 	/**
-	 * __addListeners - Binds event listener to watch for 
+	 * addListeners - Binds event listener to watch for 
 	 * window resize and sets a timer recursivly to 
-	 * check for url change, calls __match when a 
+	 * check for url change, calls matchStyles when a 
 	 * change occurs.
 	 * 
 	 */
-	CssLoader.__addListeners = function() {
+	CssLoader.addListeners = function() {
 
 		var that = this;
 
-		if (window.addEventListener) {
-			window.addEventListener('resize', function() {
-				that.__match(false, that.__curUrl);
-			}, false);
-		}
+		window.addEventListener('resize', function() {
+			that.matchStyles(false, that.__curUrl);
+		}, false);
 
-		(function hasStateChanged() {
+		/**
+		 * 
+		 * Recursivly fires every 250
+		 * milliseconds to detect any
+		 * change in url
+		 * 
+		 * 
+		 */
+		(function hasUrlStateChanged() {
 
 			window.setTimeout(function() {		
-				var url = that.__getPathName();
+				var url = that.getPathName();
 				if (url !== that.__curUrl) {
 					that.__curUrl = url;
-					that.__match(false, url);
+					that.matchStyles(false, url);
 				}
-				hasStateChanged();
-			}, 500);
+				hasUrlStateChanged();
+			}, 250);
 		})();
 	};
 
 	/**
-	 * __match - Checks if the given media queries 
-	 * and or page state match and calls __writeTag
+	 * matchStyles - Checks if the given media queries 
+	 * and or page state match and calls writeTag
 	 * when true. If loadall boolean is true all stylesheets
 	 * will be loaded.
 	 *
 	 * @param {Boolean} Load all stylesheets
 	 * 
 	 */
-	CssLoader.__match = function(loadall, url) {
+	CssLoader.matchStyles = function(loadall, url) {
 
 		var queries = [].concat(this.__queries);
 
@@ -165,7 +171,7 @@ window.CssLoader = (function(window, document, undefined) {
 			var q = queries[_i],
 				mq = window.matchMedia(q.media);
 			if (loadall || !q.rendered && mq.matches && url === q.url) {
-				this.__writeTag(q);
+				this.writeTag(q);
 				queries[_i].rendered = true;
 			}
 
@@ -176,7 +182,7 @@ window.CssLoader = (function(window, document, undefined) {
 	};
 
 	/**
-	 * __writeTag - Writes a new link tag to the DOM
+	 * writeTag - Writes a new link tag to the DOM
 	 * with the given attributes. Stylesheets are added
 	 * in the order of the array given to the require method
 	 * regardless of load order.
@@ -184,12 +190,12 @@ window.CssLoader = (function(window, document, undefined) {
 	 * @param {Object} Link attributes
 	 * 
 	 */
-	CssLoader.__writeTag = function(attributes) {
+	CssLoader.writeTag = function(attributes) {
 
 		var queries = [].concat(this.__queries),
 			head = document.getElementsByTagName('head')[0],
 			links = head.getElementsByTagName('link'),
-			link = this.__createTag(attributes),
+			link = this.createTag(attributes),
 			sort = [],
 			index;
 			
@@ -213,13 +219,13 @@ window.CssLoader = (function(window, document, undefined) {
 	};
 
 	/**
-	 * __createTag - Create a new link tag with the given attributes
+	 * createTag - Create a new link tag with the given attributes
 	 * 
 	 * @param {Object} Link attributes
 	 * @return {Object} New DOM link element
 	 * 
 	 */
-	CssLoader.__createTag = function(attributes) {
+	CssLoader.createTag = function(attributes) {
 
 		var link = document.createElement('link');
 			link.rel = 'stylesheet';
