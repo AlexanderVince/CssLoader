@@ -210,12 +210,7 @@ window.CssLoader = (function(window, document, undefined) {
 			}
 		}
 
-		if (!index) {
-			head.appendChild(link);
-		} else {
-			head.insertBefore(link, index);
-		}
-
+		return !index ? head.appendChild(link) : head.insertBefore(link, index);
 	};
 
 	/**
